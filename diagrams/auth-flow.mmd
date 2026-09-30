@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant U as User (browser/phone)
+    participant UI as Next.js app
+    participant FB as Firebase Auth
+    participant API as Cloud Run API
+    participant DB as PostgreSQL
+
+    U->>UI: Sign in (email / phone OTP / Google)
+    UI->>FB: Authenticate
+    FB-->>UI: ID token (+ custom claims: roles)
+    U->>UI: Request (e.g. "my child's grades")
+    UI->>API: API call + ID token
+    API->>FB: Verify token (Admin SDK)
+    FB-->>API: Valid, uid + claims
+    API->>DB: Load roles & scopes for uid
+    DB-->>API: e.g. guardian of student #42 only
+    API->>API: Enforce scope: filter to student #42
+    API->>DB: Scoped query
+    DB-->>API: Rows
+    API-->>UI: Response
+    UI-->>U: Render (Tamil/English)
+
+    Note over API,DB: Claims are hints for routing;<br/>the database is the authority.<br/>Every request re-verifies.

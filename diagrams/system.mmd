@@ -1,0 +1,56 @@
+flowchart TB
+    subgraph Users["Users"]
+        M["Members<br/>(~5,000)"]
+        P["Parents & Students<br/>(~2,000 students)"]
+        T["Teachers & Staff"]
+        A["Admins / Treasurers"]
+    end
+
+    subgraph Identity["Shared Identity (SSO)"]
+        FA["Firebase Authentication<br/>email · phone OTP · Google"]
+    end
+
+    subgraph Portal["Sangam Portal — GCP project sangam-portal-prod"]
+        NP["Next.js UI<br/>(Tamil/English, SSR)"]
+        AP["API — modular monolith<br/>Cloud Run"]
+        DB1[("PostgreSQL<br/>sangam_db<br/>(Cloud SQL)")]
+    end
+
+    subgraph Schools["Tamil Schools — GCP project tamil-schools-prod"]
+        NS["Next.js UI<br/>(Tamil/English, SSR)"]
+        AS["API — modular monolith<br/>Cloud Run"]
+        DB2[("PostgreSQL<br/>school_db<br/>(Cloud SQL)")]
+    end
+
+    subgraph Shared["Shared services"]
+        ST[("Cloud Storage<br/>media + curriculum")]
+        SM["Secret Manager"]
+        STR["Stripe<br/>tickets · donations · fees"]
+    end
+
+    M --> NP
+    P --> NS
+    P --> NP
+    T --> NS
+    A --> NP
+    A --> NS
+
+    NP --> FA
+    NS --> FA
+    FA -. "ID token + custom claims" .-> AP
+    FA -. "ID token + custom claims" .-> AS
+
+    NP --> AP
+    NS --> AS
+    AP --> DB1
+    AS --> DB2
+    AP --> ST
+    AS --> ST
+    AP --> STR
+    AS --> STR
+    AP --> SM
+    AS --> SM
+
+    style Identity fill:#e8f0fe,stroke:#1a73e8
+    style Portal fill:#fef7e0,stroke:#f9ab00
+    style Schools fill:#e6f4ea,stroke:#1e8e3e

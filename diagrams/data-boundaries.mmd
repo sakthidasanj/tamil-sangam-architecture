@@ -1,0 +1,46 @@
+flowchart LR
+    subgraph SharedIdentity["Shared (identity only)"]
+        UID["Firebase uid<br/>(opaque reference)"]
+    end
+
+    subgraph SangamDB["sangam_db — Sangam Portal"]
+        direction TB
+        S1["members"]
+        S2["households"]
+        S3["events"]
+        S4["ticket_types"]
+        S5["orders / order_items"]
+        S6["donations"]
+        S7["volunteer_signups"]
+        S8["audit_log"]
+    end
+
+    subgraph SchoolDB["school_db — Tamil Schools"]
+        direction TB
+        C1["students"]
+        C2["guardians"]
+        C3["student_guardians<br/>(verified links + consent)"]
+        C4["staff"]
+        C5["classes / sections"]
+        C6["enrollments"]
+        C7["attendance"]
+        C8["assignments / grades"]
+        C9["curriculum_content"]
+        C10["fee_schedules / invoices"]
+        C11["audit_log"]
+    end
+
+    UID -.-> S1
+    UID -.-> C2
+    UID -.-> C4
+
+    S5 -. "Stripe refs only" .-> EXT["Stripe"]
+    C10 -. "Stripe refs only" .-> EXT
+
+    note["No cross-database joins.<br/>No card data stored anywhere.<br/>Audit logs are append-only."]
+    note -.-> SangamDB
+    note -.-> SchoolDB
+
+    style SharedIdentity fill:#e8f0fe,stroke:#1a73e8
+    style SangamDB fill:#fef7e0,stroke:#f9ab00
+    style SchoolDB fill:#e6f4ea,stroke:#1e8e3e
